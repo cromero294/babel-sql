@@ -36,7 +36,6 @@ USE `babel-curso-mysql`;
 -- INSERT INTO ofertas_usuarios (oferta_id, usuario_id)
 -- VALUES (1, 1), (2, 1), (1, 2), (4, 2), (5, 4), (3, 4), (7, 5), (8, 5), (9, 5);
 
-
 -- SELECT e.nombre AS Nombre FROM empresas e;
 
 -- SELECT o.titulo, o.salario FROM ofertas o
@@ -103,4 +102,116 @@ USE `babel-curso-mysql`;
 -- WHERE id = 8;
 
 -- CAMBIAR SALARIO A 20000 DE AQUELLAS QUE SON FUERA DE MADRID Y TIENEN SALARIO 0
-update ofertas set salario = 20000 where ciudad <> "Madrid" and salario = 0;
+-- update ofertas set salario = 20000 where ciudad <> "Madrid" and salario = 0;
+-- update ofertas set salario = 20000 where ciudad not in ("Madrid") and salario = 0;
+
+-- delete from empresas where id = 1;
+-- delete from empresas where id = 7;
+
+-- select count(*) from empresas;
+-- select avg(salario) from ofertas;
+-- select min(salario) from ofertas;
+-- select concat(nombre, " ", apellidos) as nombre_apellidos from usuarios;
+
+-- select o.empresa_id, avg(o.salario)
+-- from ofertas o 
+-- group by o.empresa_id
+-- having avg(o.salario) > 20000;
+
+-- select e.nombre, avg(o.salario)
+-- from ofertas o, empresas e
+-- where o.empresa_id = e.id
+-- group by o.empresa_id
+-- having avg(o.salario) > 20000;
+
+-- select u.nombre, u.apellidos, o.titulo
+-- from ofertas o
+-- left join ofertas_usuarios ou on o.id = ou.oferta_id
+-- left join usuarios u on ou.usuario_id = u.id;
+
+-- select u.nombre, u.apellidos, o.titulo
+-- from ofertas o
+-- right join ofertas_usuarios ou on o.id = ou.oferta_id
+-- right join usuarios u on ou.usuario_id = u.id;
+
+-- select u.nombre, u.apellidos, o.titulo
+-- from ofertas o
+-- inner join ofertas_usuarios ou on o.id = ou.oferta_id
+-- inner join usuarios u on ou.usuario_id = u.id;
+
+-- EJERCICIOS --
+
+-- Obtener todas las ofertas que hay publicadas para Sevilla y Barcelona. (1)
+select * 
+from ofertas 
+where ciudad in ("Sevilla", "Barcelona");
+
+-- Obtener el nombre de las ofertas a las que se ha apuntado el usuario con id 3. (2)
+select o.titulo 
+from ofertas o 
+inner join ofertas_usuarios ou on o.id = ou.oferta_id
+inner join usuarios u on u.id = ou.usuario_id
+where u.id = 3;
+
+-- Obtener el número total de ofertas a las que se ha apuntado el usuario con id 3. (3)
+select count(*) 
+from ofertas o 
+inner join ofertas_usuarios ou on o.id = ou.oferta_id
+inner join usuarios u on u.id = ou.usuario_id
+where u.id = 3;
+
+-- Obtener el nombre de los usuarios que se han apuntado a la oferta con id 2. (4)
+select u.nombre
+from usuarios u 
+inner join ofertas_usuarios ou on u.id = ou.usuario_id
+inner join ofertas o on o.id = ou.oferta_id
+where o.id = 2;
+
+-- Obtener el número total de usuarios que se han apuntado a la oferta con id 2. (5)
+select count(*)
+from usuarios u 
+inner join ofertas_usuarios ou on u.id = ou.usuario_id
+inner join ofertas o on o.id = ou.oferta_id
+where o.id = 2;
+
+-- Obtener las empresas que no han publicado ninguna oferta. (6)
+select *
+from empresas
+where id not in (
+	select e.id
+	from empresas e
+	inner join ofertas o on o.empresa_id = e.id
+	where o.publicada = '1'
+);
+
+-- Obtener los usuarios que no están apuntados en ninguna oferta. (7)
+select *
+from usuarios
+where id not in (
+	select distinct(u.id)
+    from usuarios u
+	inner join ofertas_usuarios ou on ou.usuario_id = u.id
+	inner join ofertas o on ou.oferta_id = o.id
+);
+
+-- Obtener las empresas que han publicado más de 3 ofertas. (8)
+select e.nombre, count(*) as numero
+from empresas e
+inner join ofertas o on o.empresa_id = e.id
+where o.publicada = '1'
+group by e.id
+having numero > 3;
+
+-- Obtener los usuarios que se han apuntado a más de 3 ofertas. (9)
+select u.nombre, count(*) as numero_ofertas
+from usuarios u
+inner join ofertas_usuarios ou on ou.usuario_id = u.id
+group by u.id
+having numero_ofertas > 1;
+
+-- Obtener las ofertas con el número de usuarios que hay apuntados ordenadas por mayor número de apuntados. (10)
+select o.titulo, count(*) as numero_apuntados
+from ofertas o
+inner join ofertas_usuarios ou on ou.oferta_id = o.id
+group by o.id
+order by numero_apuntados desc;
