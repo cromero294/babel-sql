@@ -150,37 +150,37 @@ where ciudad in ("Sevilla", "Barcelona");
 select o.titulo 
 from ofertas o 
 inner join ofertas_usuarios ou on o.id = ou.oferta_id
-inner join usuarios u on u.id = ou.usuario_id
-where u.id = 3;
+where ou.usuario_id = 3;
 
 -- Obtener el número total de ofertas a las que se ha apuntado el usuario con id 3. (3)
 select count(*) 
 from ofertas o 
 inner join ofertas_usuarios ou on o.id = ou.oferta_id
-inner join usuarios u on u.id = ou.usuario_id
-where u.id = 3;
+where ou.usuario_id = 3;
 
 -- Obtener el nombre de los usuarios que se han apuntado a la oferta con id 2. (4)
 select u.nombre
 from usuarios u 
 inner join ofertas_usuarios ou on u.id = ou.usuario_id
-inner join ofertas o on o.id = ou.oferta_id
-where o.id = 2;
+where ou.oferta_id = 2;
 
 -- Obtener el número total de usuarios que se han apuntado a la oferta con id 2. (5)
+
+-- select count(*)
+-- from usuarios u 
+-- inner join ofertas_usuarios ou on u.id = ou.usuario_id
+-- where ou.oferta_id = 2;
+
 select count(*)
-from usuarios u 
-inner join ofertas_usuarios ou on u.id = ou.usuario_id
-inner join ofertas o on o.id = ou.oferta_id
-where o.id = 2;
+from ofertas_usuarios ou
+where ou.oferta_id = 2;
 
 -- Obtener las empresas que no han publicado ninguna oferta. (6)
 select *
 from empresas
 where id not in (
-	select e.id
-	from empresas e
-	inner join ofertas o on o.empresa_id = e.id
+	select o.empresa_id
+	from ofertas o
 	where o.publicada = '1'
 );
 
@@ -188,19 +188,21 @@ where id not in (
 select *
 from usuarios
 where id not in (
-	select distinct(u.id)
-    from usuarios u
-	inner join ofertas_usuarios ou on ou.usuario_id = u.id
-	inner join ofertas o on ou.oferta_id = o.id
+	select distinct(ou.id)
+    from ofertas_usuarios ou
 );
 
 -- Obtener las empresas que han publicado más de 3 ofertas. (8)
 select e.nombre, count(*) as numero
 from empresas e
 inner join ofertas o on o.empresa_id = e.id
-where o.publicada = '1'
 group by e.id
 having numero > 3;
+
+select * from empresas e 
+where (
+	select count(*) from ofertas o where o.empresa_id = e.id
+) > 3;
 
 -- Obtener los usuarios que se han apuntado a más de 3 ofertas. (9)
 select u.nombre, count(*) as numero_ofertas
@@ -208,6 +210,14 @@ from usuarios u
 inner join ofertas_usuarios ou on ou.usuario_id = u.id
 group by u.id
 having numero_ofertas > 1;
+
+select *
+from usuarios
+where (
+	select count(*)
+    from ofertas_usuarios ou
+    where ou.usuario_id = u.id
+) > 3;
 
 -- Obtener las ofertas con el número de usuarios que hay apuntados ordenadas por mayor número de apuntados. (10)
 select o.titulo, count(*) as numero_apuntados
