@@ -1,6 +1,6 @@
 USE `babel-curso-mysql`;
 
-
+-- ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'
 
 -- INSERT INTO `curso-mysql`.empresas (nombre)
 -- VALUES ("Babel");
